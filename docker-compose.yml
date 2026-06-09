@@ -1,0 +1,17 @@
+services:
+  gpu-monitor:
+    build: .
+    container_name: gpu-monitor
+    pid: host
+    restart: unless-stopped
+    ports:
+      - "9999:9999"
+    volumes:
+      - ./app:/app
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

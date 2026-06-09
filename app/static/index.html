@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GPU Monitor</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header>
+    <div class="header-title">
+      <span class="logo">⬛</span>
+      <h1>GPU Monitor</h1>
+      <span id="last-update" class="last-update">— 等待資料中…</span>
+    </div>
+    <div class="system-bar" id="system-bar">
+      <div class="sys-card">
+        <span class="sys-label">CPU</span>
+        <span class="sys-value" id="cpu-val">—</span>
+        <div class="mini-bar"><div class="mini-fill" id="cpu-bar" style="width:0%"></div></div>
+      </div>
+      <div class="sys-card">
+        <span class="sys-label">RAM</span>
+        <span class="sys-value" id="ram-val">—</span>
+        <div class="mini-bar"><div class="mini-fill" id="ram-bar" style="width:0%"></div></div>
+      </div>
+    </div>
+  </header>
+
+  <main id="gpu-grid"></main>
+
+  <section class="proc-section">
+    <h2>GPU 佔用程序</h2>
+    <table id="proc-table">
+      <thead>
+        <tr>
+          <th>GPU</th>
+          <th>PID</th>
+          <th>程序名稱</th>
+          <th>顯存用量 (MiB)</th>
+        </tr>
+      </thead>
+      <tbody id="proc-tbody">
+        <tr><td colspan="4" class="no-data">等待資料…</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
