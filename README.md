@@ -1,54 +1,66 @@
-# GPU Monitor Project Documentation
+# 🚀 NvidiaSmi Dashboard
 
-## 📌 Overview
-`NvidiaSmi` is a lightweight, real-time hardware monitoring service designed to provide a web-based dashboard for tracking NVIDIA GPU status, system resource usage (CPU/RAM), and active GPU processes. It leverages Docker for easy deployment and Server-Sent Events (SSE) for efficient, low-latency data streaming.
+A real-time, lightweight web-based monitoring dashboard for NVIDIA GPUs and system resources. This service provides high-frequency updates using Server-Sent Events (SSE), making it ideal for tracking GPU temperature, memory usage, power draw, and active processes with minimal overhead.
 
-## 🏗️ Architecture
-The project follows a client-server architecture:
-- **Backend**: A Python `FastAPI` application that executes `nvidia-smi` commands and parses the output.
-- **Data Stream**: Uses **Server-Sent Events (SSE)** to push updates from the server to the client every 5 seconds, avoiding the overhead of repeated HTTP polling.
-- **Frontend**: A web interface (located in `static/`) that consumes the JSON stream and renders real-time metrics.
-- **Containerization**: Dockerized via `Dockerfile` and managed by `docker-compose.yml`, ensuring GPU passthrough is configured correctly.
+## ✨ Features
 
-## ⚙️ Core Workflow
+- 📊 **Real-Time Monitoring**: Live updates of GPU utilization, memory, temperature, and power usage via SSE.
+- 🔍 **Process Tracking**: Automatically identifies which processes are consuming GPU resources.
+ 
+- 🖥️ **System Health**: Monitor overall CPU and RAM usage alongside your GPU metrics.
+- 🐳 **Docker Ready**: One-command deployment using Docker Compose with full NVIDIA GPU passthrough support.
+- ⚡ **Low Latency**: Uses `nvidia-smi` parsing and asynchronous streaming for high performance.
 
-### 1. Data Collection Pipeline
-The backend performs three distinct collection tasks:
-1.  **GPU Metrics (`collect_gpu_stats`)**:
-    *   Executes `nvidia-smi --query-gpu=... --format=csv`.
-    *   Extracts: Utilization %, Memory (Used/Total), Temperature, Power Draw, and Clock speeds.
-2.  **Process Tracking (`collect_processes`)**:
-    *   Execations `nvidia-smi -q -x` (XML format).
-    *   Maps GPU UUIDs to indices.
-    *   Pars/> parses `<process_info>` nodes to identify PIDs and process names.
-    *   **Fallback Mechanism**: If the driver returns "N/A" for a process name, it uses `psutil` to resolve the name from the system PID.
-3.  **System Health (`collect_system`)**:
-    *   Uses `psutil` to capture CPU utilization and RAM usage (Used/Total/Percentage).
+## 🛠️ Tech Stack
 
-### 2. Data Streaming (The SSE Loop)
-- The endpoint `/api/stream` initiates an asynchronous generator.
-- **Interval**: Every 5 seconds, a new snapshot of all collected data is captured.
-- **Payload**: A JSON object containing `gpus`, `processes`, and `system` keys is pushed to the client as a `text/event-stream`.
-
-### 3. Deployment Flow
-1.  **Docker Build**: The `docker-compose` builds an image from the local `Dockerfile`.
-2.  **GPU Access**: The container is granted access to all host NVIDIA GPUs via the `nvidia-container-toolkit` (defined in `deploy.resources`).
-3.  **Service Exposure**: Port `9999` is mapped, allowing users to access the dashboard via `http://<host>:9999`.
-
-## 🛠️ Technology Stack
-- **Language**: Python 3.x
-- **Web Framework**: FastAPI
-- **ASGI Server**: Uvicorn
-- **System Utilities**: `psutil`, `nvidia-smi`
+- **Backend**: [FastAPI](https://fastapi.tiangolo.com/) (Python)
+- **Streaming**: Server-Sent Events (SSE)
+- **Frontend**: Vanilla JavaScript, HTML5, CSS3
 - **Containerization**: Docker & Docker Compose
+- **System Utilities**: `nvidia-smi`, `psutil`
 
-## 📂 Directory Structure
+## 🚀 Getting Started
+
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/)
+- [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) installed on your host machine to enable GPU access within containers.
+
+### Deployment
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/YCHsu661121/NvidiaSmi.git
+   cd NvidiaSmi
+   ```
+
+2. **Launch with Docker Compose:**
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **Access the Dashboard:**
+   Open your browser and navigate to:
+   `http://localhost:9999`
+
+## 📂 Project Structure
+
 ```text
 NvidiaSmi/
-├── docker-compose.yml   # Orchestration & GPU configuration
 ├── app/
-│   ├── main.py          # Core logic (API, Parsing, SSE)
-│   ├── requirements.txt # Python dependencies
-│   └── static/          # Frontend assets (HTML/JS/CSS)
-└── Dockerfile           # Environment setup
+│   ├── main.py              # FastAPI backend & SSE logic
+│   ├── requirements.txt     # Python dependencies
+│   └── static/              # Frontend assets (HTML, JS, CSS)
+├── docker-compose.yml       # Docker orchestration with GPU config
+├── Dockerfile               # Container environment definition
+├── gpu_stress_test.py       # Script for testing GPU load
+└── README.md                # Project documentation
 ```
+
+## ⚙️ How it Works
+
+The backend periodically executes `nvidia-smi` queries and process checks. The results are bundled into a JSON payload and pushed to the web client every 5 seconds via an asynchronous stream. This approach avoids the "heavy lifting" of traditional HTTP polling, ensuring that monitoring the system doesn't significantly impact its performance.
+
+## 📜 License
+
+[MIT License](LICENSE)
